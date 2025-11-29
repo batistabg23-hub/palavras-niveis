@@ -4,8 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Lista de Palavras - Níveis</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Manifest CORRIGIDO -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="./styles.css">
+
   <meta name="theme-color" content="#2b2b2b" />
 </head>
 <body>
@@ -22,16 +27,19 @@
     </section>
   </main>
 
-  <script src="/app.js" defer></script>
+  <!-- JS principal -->
+  <script src="./app.js" defer></script>
 
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .catch(err => console.warn('SW registration failed', err));
-    });
-}
-</script>
+  <!-- Registro do Service Worker CORRIGIDO -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(() => console.log("Service Worker registrado."))
+          .catch(err => console.warn("Falha ao registrar SW:", err));
+      });
+    }
+  </script>
 
 </body>
 </html>
