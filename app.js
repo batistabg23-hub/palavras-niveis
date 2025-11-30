@@ -9,11 +9,21 @@ const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 
+// gera id único
+function uid() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
 addBtn.onclick = () => {
   const w = input.value.trim();
   if (!w) return;
 
-  words.push({ word: w, level: 0 });
+  words.push({
+    id: uid(),
+    word: w,
+    level: 0
+  });
+
   input.value = "";
   sortWords();
   updateList();
@@ -29,7 +39,6 @@ function sortWords() {
 
 function updateList() {
   sortWords();
-
   listEl.innerHTML = "";
 
   const totalPages = Math.max(1, Math.ceil(words.length / pageSize));
@@ -38,7 +47,7 @@ function updateList() {
   const start = (currentPage - 1) * pageSize;
   const items = words.slice(start, start + pageSize);
 
-  items.forEach((item, index) => {
+  items.forEach((item) => {
     const div = document.createElement("div");
     div.className = "item";
 
@@ -54,28 +63,23 @@ function updateList() {
       </div>
     `;
 
-    const realIndex = start + index;
-
     // diminuir nível
     div.querySelector(".minus").onclick = () => {
-      if (words[realIndex].level > 0) {
-        words[realIndex].level--;
-        sortWords();
-        updateList();
-      }
+      const obj = words.find(w => w.id === item.id);
+      if (obj.level > 0) obj.level--;
+      updateList();
     };
 
     // aumentar nível
     div.querySelector(".plus").onclick = () => {
-      words[realIndex].level++;
-      sortWords();
+      const obj = words.find(w => w.id === item.id);
+      obj.level++;
       updateList();
     };
 
-    // excluir palavra
+    // excluir
     div.querySelector(".delete").onclick = () => {
-      words.splice(realIndex, 1);
-      sortWords();
+      words = words.filter(w => w.id !== item.id);
       updateList();
     };
 
