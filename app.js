@@ -9,7 +9,6 @@ const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 
-// gera id único
 function uid() {
   return Math.random().toString(36).substr(2, 9);
 }
@@ -29,7 +28,6 @@ addBtn.onclick = () => {
   updateList();
 };
 
-// 🔥 Organiza automaticamente
 function sortWords() {
   words.sort((a, b) => {
     if (b.level !== a.level) return b.level - a.level;
@@ -38,7 +36,6 @@ function sortWords() {
 }
 
 function updateList() {
-  sortWords();
   listEl.innerHTML = "";
 
   const totalPages = Math.max(1, Math.ceil(words.length / pageSize));
@@ -67,6 +64,7 @@ function updateList() {
     div.querySelector(".minus").onclick = () => {
       const obj = words.find(w => w.id === item.id);
       if (obj.level > 0) obj.level--;
+      sortWords();
       updateList();
     };
 
@@ -74,12 +72,14 @@ function updateList() {
     div.querySelector(".plus").onclick = () => {
       const obj = words.find(w => w.id === item.id);
       obj.level++;
+      sortWords();
       updateList();
     };
 
     // excluir
     div.querySelector(".delete").onclick = () => {
       words = words.filter(w => w.id !== item.id);
+      sortWords();
       updateList();
     };
 
