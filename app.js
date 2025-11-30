@@ -19,19 +19,16 @@ addBtn.onclick = () => {
   updateList();
 };
 
-// 🔥 Função que organiza automaticamente
+// 🔥 Organiza automaticamente
 function sortWords() {
   words.sort((a, b) => {
-    // Primeiro ordena pelo nível (maior nível primeiro)
     if (b.level !== a.level) return b.level - a.level;
-
-    // Depois ordena alfabeticamente se o nível for igual
     return a.word.localeCompare(b.word, "pt-BR");
   });
 }
 
 function updateList() {
-  sortWords(); // sempre organiza antes de mostrar
+  sortWords();
 
   listEl.innerHTML = "";
 
@@ -53,11 +50,13 @@ function updateList() {
         <div class="ctrl-btn minus">-</div>
         <div class="level-display">${item.level}</div>
         <div class="ctrl-btn plus">+</div>
+        <div class="ctrl-btn delete" style="background:#ffb3b3;">X</div>
       </div>
     `;
 
     const realIndex = start + index;
 
+    // diminuir nível
     div.querySelector(".minus").onclick = () => {
       if (words[realIndex].level > 0) {
         words[realIndex].level--;
@@ -66,8 +65,16 @@ function updateList() {
       }
     };
 
+    // aumentar nível
     div.querySelector(".plus").onclick = () => {
       words[realIndex].level++;
+      sortWords();
+      updateList();
+    };
+
+    // excluir palavra
+    div.querySelector(".delete").onclick = () => {
+      words.splice(realIndex, 1);
       sortWords();
       updateList();
     };
