@@ -1,3 +1,6 @@
+/* ================================
+   VARIÁVEIS
+================================ */
 let words = [];
 let currentPage = 1;
 const pageSize = 10;
@@ -9,25 +12,23 @@ const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 
-function uid() {
-  return Math.random().toString(36).substr(2, 9);
+/* ================================
+   LOCALSTORAGE
+================================ */
+function saveWords() {
+  localStorage.setItem("myWords", JSON.stringify(words));
 }
 
-addBtn.onclick = () => {
-  const w = input.value.trim();
-  if (!w) return;
+function loadWords() {
+  const data = localStorage.getItem("myWords");
+  if (data) {
+    words = JSON.parse(data);
+  }
+}
 
-  words.push({
-    id: uid(),
-    word: w,
-    level: 0
-  });
-
-  input.value = "";
-  sortWords();
-  updateList();
-};
-
+/* ================================
+   FUNÇÃO DE ORDENAR
+================================ */
 function sortWords() {
   words.sort((a, b) => {
     if (b.level !== a.level) return b.level - a.level;
@@ -35,7 +36,29 @@ function sortWords() {
   });
 }
 
+/* ================================
+   ADICIONAR PALAVRA
+================================ */
+addBtn.onclick = () => {
+  const w = input.value.trim();
+  if (!w) return;
+
+  words.push({
+    id: crypto.randomUUID(), // ID exclusivo para evitar troca errada
+    word: w,
+    level: 0
+  });
+
+  input.value = "";
+  saveWords();
+  updateList();
+};
+
+/* ================================
+   ATUALIZAR LISTA
+================================ */
 function updateList() {
+  sortWords();
   listEl.innerHTML = "";
 
   const totalPages = Math.max(1, Math.ceil(words.length / pageSize));
@@ -44,7 +67,7 @@ function updateList() {
   const start = (currentPage - 1) * pageSize;
   const items = words.slice(start, start + pageSize);
 
-  items.forEach((item) => {
+  items.forEach(item => {
     const div = document.createElement("div");
     div.className = "item";
 
@@ -60,26 +83,26 @@ function updateList() {
       </div>
     `;
 
-    // diminuir nível
+    // DIMINUIR NÍVEL
     div.querySelector(".minus").onclick = () => {
-      const obj = words.find(w => w.id === item.id);
-      if (obj.level > 0) obj.level--;
-      sortWords();
-      updateList();
+      if (item.level > 0) {
+        item.level--;
+        saveWords();
+        updateList();
+      }
     };
 
-    // aumentar nível
+    // AUMENTAR NÍVEL
     div.querySelector(".plus").onclick = () => {
-      const obj = words.find(w => w.id === item.id);
-      obj.level++;
-      sortWords();
+      item.level++;
+      saveWords();
       updateList();
     };
 
-    // excluir
+    // EXCLUIR
     div.querySelector(".delete").onclick = () => {
-      words = words.filter(w => w.id !== item.id);
-      sortWords();
+      words = words.filter(x => x.id !== item.id);
+      saveWords();
       updateList();
     };
 
@@ -89,6 +112,9 @@ function updateList() {
   pageInfo.textContent = `${currentPage} / ${totalPages}`;
 }
 
+/* ================================
+   PAGINAÇÃO
+================================ */
 prevBtn.onclick = () => {
   if (currentPage > 1) {
     currentPage--;
@@ -104,4 +130,8 @@ nextBtn.onclick = () => {
   }
 };
 
+/* ================================
+   INICIAR
+================================ */
+loadWords();
 updateList();
