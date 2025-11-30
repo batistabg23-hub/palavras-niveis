@@ -1,66 +1,65 @@
-// ===============================
-// SERVICE WORKER — AUTO UPDATE
-// ===============================
+// service-worker.js — Atualização imediata e reload do cliente
 
-// Mude este número sempre que quiser forçar atualização manual.
-// Mas na maioria das vezes não precisa, pois o hash faz isso sozinho.
-const SW_VERSION = "v1";
-
-// Nome do cache
-const CACHE_NAME = "palavras-cache-" + SW_VERSION;
-
-// Arquivos a serem cacheados
+const SW_VERSION = 'v2'; // aumente quando quiser forçar manualmente
+const CACHE_NAME = `palavras-cache-${SW_VERSION}`;
 const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./manifest.json",
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
-// INSTALAÇÃO — faz o download dos arquivos novos
-self.addEventListener("install", (event) => {
-  console.log("[SW] Instalando nova versão", SW_VERSION);
-
+// Instalando: cacheia arquivos e força espera curta
+self.addEventListener('install', (event) => {
+  console.log('[SW] install', SW_VERSION);
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
   );
-
-  // Força a ativação imediata
+  // ativa a nova versão imediatamente (pula waiting)
   self.skipWaiting();
 });
 
-// ATIVAÇÃO — apaga caches antigos automaticamente
-self.addEventListener("activate", (event) => {
-  console.log("[SW] Ativando versão", SW_VERSION);
-
+// Ativando: remove caches antigos e toma controle dos clients
+self.addEventListener('activate', (event) => {
+  console.log('[SW] activate', SW_VERSION);
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then(keys => Promise.all(
+      keys
+        .filter(k => k !== CACHE_NAME)
+        .map(k => caches.delete(k))
+    ))
   );
-
-  self.clients.claim();
+  // assume controle imediatamente
+  return self.clients.claim();
 });
 
-// FETCH — lógica inteligente de atualização
-self.addEventListener("fetch", (event) => {
+// Fetch: tenta rede primeiro, atualiza cache; se offline, serve cache
+self.addEventListener('fetch', (event) => {
+  // ignore requests to chrome-extension:// and data: etc.
+  if (event.request.url.startsWith('chrome-extension://') || event.request.url.startsWith('data:')) {
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)               // tenta pegar a versão nova sempre
-      .then((response) => {
-        // Atualiza o cache com o arquivo novo
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, clone);
-        });
+    fetch(event.request)
+      .then(response => {
+        // clone e atualiza cache
+        if (response && response.status === 200 && event.request.method === 'GET') {
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone)).catch(()=>{});
+        }
         return response;
       })
-      .catch(() => caches.match(event.request)) // se offline, usa o cache
+      .catch(() => caches.match(event.request))
   );
+});
+
+// Se receber mensagem 'skip-waiting', faz activate imediatamente
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING_AND_RELOAD') {
+    self.skipWaiting();
+  }
 });
