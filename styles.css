@@ -10,24 +10,21 @@
   box-sizing:border-box;
 }
 
-/* NÃO USAR height:100% — isso trava o scroll */
 html, body{
   margin:0;
-  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto;
   background:var(--bg);
   color:var(--accent);
 }
 
-/* AGORA O BODY PODE CRESCER E O SCROLL FUNCIONA */
 body{
   padding:24px;
   display:flex;
   justify-content:center;
-  align-items:flex-start; /* evita travar scroll em telas pequenas */
-  min-height:100vh;       /* permite altura variável */
+  align-items:flex-start;
+  min-height:100vh;
 }
 
-/* CONTAINER — NÃO DEFINIR max-height */
 .container{
   width:360px;
   max-width:95vw;
@@ -36,30 +33,24 @@ body{
   padding:18px;
   border-radius:8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-
   display:flex;
   flex-direction:column;
 }
 
-/* ÁREA ROLÁVEL — funciona 100% */
 .scroll-wrap{
   flex:1;
   overflow-y:auto;
   padding-right:4px;
   margin-top:4px;
-
-  /* LIMITE DE ALTURA PARA GARANTIR SCROLL */
-  max-height: calc(100vh - 190px);
+  max-height: calc(100vh - 260px);
 }
 
-/* TÍTULO */
 h1{
   font-size:18px;
   margin:0 0 12px 0;
   text-align:center;
 }
 
-/* INPUT + BOTÃO */
 .input-row{
   display:flex;
   gap:8px;
@@ -70,7 +61,6 @@ h1{
   padding:10px;
   border-radius:12px;
   border:3px solid #111;
-  outline:none;
   font-weight:600;
 }
 .input-row button{
@@ -82,14 +72,12 @@ h1{
   cursor:pointer;
 }
 
-/* LISTA */
 .list{
   display:flex;
   flex-direction:column;
   gap:10px;
 }
 
-/* ITEM */
 .item{
   display:flex;
   align-items:center;
@@ -138,9 +126,18 @@ h1{
   font-weight:800;
 }
 
-.small-muted{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:6px;
-  text-align:center;
+.pagination{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  margin-top:12px;
+}
+.pagination button{
+  padding:6px 14px;
+  border-radius:8px;
+  border:3px solid #111;
+  background:var(--btn);
+  cursor:pointer;
+  font-weight:800;
 }
