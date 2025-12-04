@@ -2,6 +2,7 @@
    VARIÁVEIS
 ================================ */
 let words = [];
+let filteredWords = null; // ← lista filtrada
 let currentPage = 1;
 const pageSize = 10;
 
@@ -11,6 +12,7 @@ const listEl = document.getElementById("list");
 const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
+const searchInput = document.getElementById("searchInput"); // ← NOVO
 
 /* ================================
    LOCALSTORAGE
@@ -27,10 +29,17 @@ function loadWords() {
 }
 
 /* ================================
+   NORMALIZAR TEXTO (remove acentos)
+================================ */
+function normalize(text) {
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/* ================================
    FUNÇÃO DE ORDENAR
 ================================ */
-function sortWords() {
-  words.sort((a, b) => {
+function sortWords(list = words) {
+  list.sort((a, b) => {
     if (b.level !== a.level) return b.level - a.level;
     return a.word.localeCompare(b.word, "pt-BR");
   });
@@ -44,28 +53,48 @@ addBtn.onclick = () => {
   if (!w) return;
 
   words.push({
-    id: crypto.randomUUID(), // ID exclusivo para evitar troca errada
+    id: crypto.randomUUID(),
     word: w,
     level: 0
   });
 
   input.value = "";
   saveWords();
-  updateList();
+  applySearch();   // ← mantém busca funcionando
 };
+
+/* ================================
+   FUNÇÃO DE BUSCA
+================================ */
+function applySearch() {
+  const txt = normalize(searchInput.value);
+
+  if (txt === "") {
+    filteredWords = null;
+  } else {
+    filteredWords = words.filter(item =>
+      normalize(item.word).includes(txt)
+    );
+  }
+
+  currentPage = 1;
+  updateList();
+}
 
 /* ================================
    ATUALIZAR LISTA
 ================================ */
 function updateList() {
-  sortWords();
+  const listToShow = filteredWords ?? words;
+
+  sortWords(listToShow);
   listEl.innerHTML = "";
 
-  const totalPages = Math.max(1, Math.ceil(words.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(listToShow.length / pageSize));
   if (currentPage > totalPages) currentPage = totalPages;
 
   const start = (currentPage - 1) * pageSize;
-  const items = words.slice(start, start + pageSize);
+  const items = listToShow.slice(start, start + pageSize);
 
   items.forEach(item => {
     const div = document.createElement("div");
@@ -83,27 +112,24 @@ function updateList() {
       </div>
     `;
 
-    // DIMINUIR NÍVEL
     div.querySelector(".minus").onclick = () => {
       if (item.level > 0) {
         item.level--;
         saveWords();
-        updateList();
+        applySearch();
       }
     };
 
-    // AUMENTAR NÍVEL
     div.querySelector(".plus").onclick = () => {
       item.level++;
       saveWords();
-      updateList();
+      applySearch();
     };
 
-    // EXCLUIR
     div.querySelector(".delete").onclick = () => {
       words = words.filter(x => x.id !== item.id);
       saveWords();
-      updateList();
+      applySearch();
     };
 
     listEl.appendChild(div);
@@ -123,12 +149,19 @@ prevBtn.onclick = () => {
 };
 
 nextBtn.onclick = () => {
-  const totalPages = Math.ceil(words.length / pageSize);
+  const listToShow = filteredWords ?? words;
+  const totalPages = Math.ceil(listToShow.length / pageSize);
+
   if (currentPage < totalPages) {
     currentPage++;
     updateList();
   }
 };
+
+/* ================================
+   EVENTO DA BARRA DE PESQUISA
+================================ */
+searchInput.addEventListener("input", applySearch);
 
 /* ================================
    INICIAR
