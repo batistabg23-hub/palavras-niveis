@@ -15,6 +15,7 @@
 
     <h1>Palavras — Níveis</h1>
 
+    <!-- Campo para adicionar palavras -->
     <section class="input-row">
       <input 
         id="wordInput" 
@@ -24,6 +25,16 @@
         autocomplete="off"
       />
       <button id="addBtn">ADD</button>
+    </section>
+
+    <!-- 🔍 BARRA DE PESQUISA -->
+    <section class="input-row">
+      <input 
+        id="searchInput" 
+        type="text" 
+        placeholder="Pesquisar palavra..."
+        autocomplete="off"
+      />
     </section>
 
     <div class="scroll-wrap">
@@ -48,15 +59,12 @@
             updateViaCache: 'none'
           });
 
-          // Se já existir um SW esperando, ativa imediatamente
           if (reg.waiting) {
             reg.waiting.postMessage({ type: 'SKIP_WAITING_AND_RELOAD' });
           }
 
-          // Checa atualização
           reg.update();
 
-          // Quando o novo SW assumir controle → recarrega automaticamente
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             window.location.reload();
           });
